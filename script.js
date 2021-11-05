@@ -5,6 +5,7 @@ let todos = [];
 window.onload = function () {
     todos = localStorage.getItem("todos");
     todos = JSON.parse(todos);
+    if (todos == null) { return; }
     if (todos.length > 0) {
         taskdiv.querySelector(".no").remove();
         for (let i = 0; i < todos.length; i++) {
@@ -43,6 +44,7 @@ document.getElementById("add").addEventListener('click', e => {
         task.appendChild(b1);
         task.appendChild(b2);
         task.appendChild(output);
+        task.querySelector('.checkbox').addEventListener('change', check)
         if (tasks.length == 0)
             taskdiv.querySelector(".no").remove();
         div.appendChild(task);
