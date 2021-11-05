@@ -1,14 +1,12 @@
-
-
 const taskdiv = document.querySelector(".task-div");
 const tasks = document.getElementsByClassName("task")
 let todos = [];
 
 window.onload = function () {
     todos = localStorage.getItem("todos");
-    if (todos != null) {
+    todos = JSON.parse(todos);
+    if (todos.length > 0) {
         taskdiv.querySelector(".no").remove();
-        todos = JSON.parse(todos);
         for (let i = 0; i < todos.length; i++) {
             const task = document.createElement('div');
             task.className = "task";
@@ -18,7 +16,6 @@ window.onload = function () {
         update();
     }
 };
-
 document.getElementById("add").addEventListener('click', e => {
     e.preventDefault();
     const div = document.querySelector(".task-div");
@@ -46,16 +43,14 @@ document.getElementById("add").addEventListener('click', e => {
         task.appendChild(b1);
         task.appendChild(b2);
         task.appendChild(output);
-        if(tasks.length == 0)
+        if (tasks.length == 0)
             taskdiv.querySelector(".no").remove();
         div.appendChild(task);
-        todos.push(task.innerHTML.toString());
-        console.log(todos)
+        document.querySelector(".inputTask").value = "";
+        document.querySelector(".inputTask").focus();
+        update();
+
     }
-    document.querySelector(".inputTask").value = "";
-    document.querySelector(".inputTask").focus();
-    update();
-    localStorage.setItem("todos", JSON.stringify(todos));
 })
 document.getElementById("sort").addEventListener('click', e => {
     e.preventDefault();
@@ -94,8 +89,6 @@ document.getElementById("delete").addEventListener('click', e => {
     }
     update();
 })
-
-
 function goUp(e) {
     let parentElement = e.target.parentElement;
     if (parentElement.className == "up") {
@@ -104,17 +97,13 @@ function goUp(e) {
 
     let temp1 = parentElement;
     let temp2 = temp1.previousElementSibling;
-    console.log("up")
-    // console.log(temp1);
-    // console.log(temp2);
+
     const store = temp2.innerHTML;
     temp2.innerHTML = temp1.innerHTML;
     temp1.innerHTML = store;
     update();
 
 }
-
-
 function goDown(e) {
     let parentElement = e.target.parentElement;
     if (parentElement.className == "down") {
@@ -123,17 +112,11 @@ function goDown(e) {
 
     let temp1 = parentElement;
     let temp2 = temp1.nextElementSibling;
-    console.log("down")
-    // console.log(e.target.parentElement.className)
-    // console.log(temp1);
-    // console.log(temp2);
     const store = temp2.innerHTML;
     temp2.innerHTML = temp1.innerHTML;
     temp1.innerHTML = store;
     update();
 }
-
-
 function updateUpDownBtn() {
     const tasks = document.getElementsByClassName("task")
     let up = document.getElementsByClassName("up");
@@ -145,31 +128,35 @@ function updateUpDownBtn() {
         down[i].onclick = goDown;
     }
 }
+function check() {
+    let ele = this.parentElement;
+    let text = ele.getElementsByTagName('li')[0].innerText;
+    if (ele.querySelector('.checkbox').checked) {
+        ele.querySelector('.checkbox').value = "checked";
+        ele.getElementsByTagName('li')[0].innerHTML = `<strike>${text}</strike>`;
+    }
+    else {
+        ele.querySelector('.checkbox').value = '';
+        ele.getElementsByTagName('li')[0].innerHTML = `${text}`;
+    }
+    updateStorage();
+}
 function updateCheckBox() {
-    let task = document.getElementsByClassName("task");
-    for (let i = 0; i < task.length; i++) {
-        task[i].querySelector('.checkbox').addEventListener('change', () => {
-            
-            let text = task[i].getElementsByTagName('li')[0].innerText;
-            if (task[i].querySelector('.checkbox').checked) {
-                task[i].querySelector('.checkbox').value = "checked";
-                task[i].getElementsByTagName('li')[0].innerHTML = `<strike>${text}</strike>`;
-            }
-            else {
-                task[i].querySelector('.checkbox').value = '';
-                task[i].getElementsByTagName('li')[0].innerHTML = `${text}`;
-            }
-        })
+    for (let i = 0; i < tasks.length; i++) {
+        tasks[i].querySelector('.checkbox').removeEventListener('change', check);
+        tasks[i].querySelector('.checkbox').addEventListener('change', check)
     }
 
-    for (let i = 0; i < task.length; i++) {
-        if (task[i].querySelector(".checkbox").value == "checked") {
-            task[i].querySelector(".checkbox").checked = true;
+
+    for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].querySelector(".checkbox").value == "checked") {
+            tasks[i].querySelector(".checkbox").checked = true;
         }
         else {
-            task[i].querySelector(".checkbox").checked = false;
+            tasks[i].querySelector(".checkbox").checked = false;
         }
     }
+
 }
 function addRemoveBtn() {
     const task = document.getElementsByClassName("task")
@@ -189,10 +176,26 @@ function addRemoveBtn() {
         task[i].querySelector(".down").style.visibility = "visible";
     }
 }
+function updateStorage() {
+    todos = [];
+    for (let i = 0; i < tasks.length; i++) {
+        todos.push(tasks[i].innerHTML);
+    }
+    localStorage.setItem("todos", JSON.stringify(todos));
+}
 function update() {
-    updateUpDownBtn();
-    updateCheckBox();
-    addRemoveBtn();
+    if (taskdiv.childElementCount == 0) {
+        const no = document.createElement('div')
+        no.className = "no";
+        no.innerHTML = "No todos remaining...";
+        taskdiv.append(no);
+    }
+    if (tasks.length > 0) {
+        updateUpDownBtn();
+        updateCheckBox();
+        addRemoveBtn();
+    }
+    updateStorage();
 }
 
 
