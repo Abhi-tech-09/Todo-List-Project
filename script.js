@@ -15,6 +15,7 @@ window.onload = function () {
             taskdiv.appendChild(task);
         }
         update();
+        updateDrag();
     }
 };
 document.getElementById("add").addEventListener('click', e => {
@@ -40,6 +41,7 @@ document.getElementById("add").addEventListener('click', e => {
         b2.setAttribute("title", "MoveDown")
         const task = document.createElement('div');
         task.className = "task";
+        task.setAttribute("draggable",true);
         task.appendChild(check);
         task.appendChild(b1);
         task.appendChild(b2);
@@ -51,8 +53,9 @@ document.getElementById("add").addEventListener('click', e => {
         document.querySelector(".inputTask").value = "";
         document.querySelector(".inputTask").focus();
         update();
-
+        updateDrag();
     }
+    
 })
 document.getElementById("sort").addEventListener('click', e => {
     e.preventDefault();
@@ -184,6 +187,38 @@ function updateStorage() {
         todos.push(tasks[i].innerHTML);
     }
     localStorage.setItem("todos", JSON.stringify(todos));
+}
+function updateDrag(){
+    let taskArray = document.querySelectorAll(".task");
+    let dropTask = null;
+    taskArray.forEach(task => {
+        task.setAttribute("draggable",true);
+        task.addEventListener("dragstart",e=>{
+            // console.log("start");
+            e.target.classList.add('dragging');
+        })
+        task.addEventListener("dragend",e=>{
+            e.preventDefault();
+            let currEle = e.target ; 
+            let temp = currEle.innerHTML ;
+            currEle.innerHTML = dropTask.innerHTML ; 
+            dropTask.innerHTML = temp ; 
+            e.target.classList.remove('dragging');
+            // console.log("end")
+            update();
+        })
+        task.addEventListener("dragover" ,e=>{
+            e.preventDefault(); 
+            // console.log("over");
+            taskArray.forEach(taskele => {
+                let top = taskele.offsetTop ; 
+                let bottom = top + taskele.offsetHeight + 6 ; 
+                if(e.clientY >= top && e.clientY <= bottom){
+                    dropTask = taskele ;
+                }
+            })
+        })
+    });
 }
 function update() {
     if (taskdiv.childElementCount == 0) {
