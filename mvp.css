@@ -263,9 +263,9 @@ sup {
 
 /* Links */
 a {
-    color: var(--color);
+    color: var(--color-text);
     display: inline-block;
-    font-weight: bold;
+    /* font-weight: bold; */
     text-decoration: none;
 }
 
