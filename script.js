@@ -207,14 +207,15 @@ function updateDrag() {
         task.addEventListener("dragstart", e => {
             // console.log("start");
             e.target.classList.add('dragging');
-            start = e.target;
-            if (start.className == "")
-                start = start.parentElement;
             // console.log("start" , e.target)
         })
         task.addEventListener("dragend", e => {
             e.preventDefault();
             let currEle = document.querySelector('.dragging');
+            if (currEle == null) return;
+            // console.log(currEle);
+            while (currEle.classList[0] != "task") currEle = currEle.parentElement;
+            while (dropTask.className != "task") dropTask = dropTask.parentElement;
             // console.log("end",currEle , dropTask);
             if (currEle != null) {
                 let temp = currEle.innerHTML;
@@ -226,15 +227,12 @@ function updateDrag() {
         })
         task.addEventListener("dragover", e => {
             e.preventDefault();
-
-            // console.log("over" , e.target);
             taskArray.forEach(taskele => {
                 let top = taskele.offsetTop;
                 let bottom = top + taskele.offsetHeight + 6;
                 if (e.clientY >= top && e.clientY <= bottom) {
                     dropTask = taskele;
-                    if (dropTask.className == '')
-                        dropTask = dropTask.parentElement;
+
                     // console.log("over" , taskele);
                 }
             })
@@ -255,7 +253,6 @@ function update() {
     }
     updateStorage();
 }
-
 document.getElementById("cf").addEventListener("click", e => {
     e.preventDefault();
     document.querySelector(".filter-section").style.display = "block";
@@ -289,8 +286,8 @@ document.getElementById("cf").addEventListener("click", e => {
         for (let i = 0; i < taglist.length; i++) {
             tags += `${taglist[i].innerText};`;
         }
-        let start = document.querySelector(".startR").value  ; 
-        let end = document.querySelector(".stopR").value ; 
+        let start = document.querySelector(".startR").value;
+        let end = document.querySelector(".stopR").value;
         console.log(tags);
         str = `https://codeforces.com/api/problemset.problems?tags=${tags}`
 
@@ -301,12 +298,13 @@ document.getElementById("cf").addEventListener("click", e => {
         ).then(res => res.json())
             .then(data => {
                 let problems = [];
-                if(start > 0 && end > 0){
-                for(let i = 0 ; i < data.result.problems.length ; i++){
-                    let currProblem = data.result.problems[i] ;
-                    if(currProblem.rating >= start && currProblem.rating <= end)
-                        problems.push(currProblem);
-                }}
+                if (start > 0 && end > 0) {
+                    for (let i = 0; i < data.result.problems.length; i++) {
+                        let currProblem = data.result.problems[i];
+                        if (currProblem.rating >= start && currProblem.rating <= end)
+                            problems.push(currProblem);
+                    }
+                }
                 else
                     problems = data.result.problems;
                 // console.log(problems);
@@ -315,12 +313,14 @@ document.getElementById("cf").addEventListener("click", e => {
                     let task = createTodo('');
                     const li = task.getElementsByTagName('li')[0];
                     li.innerHTML = `<a target="_blank" href = "https://codeforces.com/problemset/problem/${problems[idx].contestId}/${problems[idx].index}">${problems[idx].name}</a>`;
+                    if (tasks.length == 0)
+                        taskdiv.querySelector(".no").remove();
                     taskdiv.appendChild(task);
                 }
 
                 document.querySelector(".filter-section").style.display = "none";
-                update(); 
-                updateDrag(); 
+                update();
+                updateDrag();
             })
     })
 
